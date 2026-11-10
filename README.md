@@ -192,6 +192,13 @@ See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for a comprehensive overview of the 
 
 ---
 
+## Author & Organization
+
+- **Owner & Builder**: Anant Jain
+- **Organization**: Astra Dynamics
+
+---
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

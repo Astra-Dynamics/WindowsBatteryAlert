@@ -4,9 +4,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("BatteryAlert")]
 [assembly: AssemblyDescription("Lightweight Cortana-styled Windows tray app for laptop charge notifications")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("BatteryAlert")]
+[assembly: AssemblyCompany("Astra Dynamics")]
 [assembly: AssemblyProduct("BatteryAlert")]
-[assembly: AssemblyCopyright("Copyright © 2026")]
+[assembly: AssemblyCopyright("Copyright © 2026 Anant Jain, Astra Dynamics")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
