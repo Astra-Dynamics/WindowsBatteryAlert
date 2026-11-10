@@ -1,0 +1,24 @@
+# Build Outputs
+dist/
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+*.tmp
+
+# Visual Studio / IDE
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Windows OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Logs & temp
+*.log
