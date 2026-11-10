@@ -40,7 +40,7 @@ namespace BatteryAlert.Services
                         if (enable)
                         {
                             string exePath = Application.ExecutablePath;
-                            key.SetValue(AppName, "\"" + exePath + "\"");
+                            key.SetValue(AppName, "\"" + exePath + "\" --autostart");
                         }
                         else
                         {

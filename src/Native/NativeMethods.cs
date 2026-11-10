@@ -33,6 +33,10 @@ namespace BatteryAlert.Native
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool DestroyIcon(IntPtr hIcon);
 
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool SetForegroundWindow(IntPtr hWnd);
+
         public static readonly IntPtr HWND_BROADCAST = new IntPtr(0xffff);
         public const int WM_POWERBROADCAST = 0x0218;
         public const int PBT_APMPOWERSTATUSCHANGE = 0x000A;

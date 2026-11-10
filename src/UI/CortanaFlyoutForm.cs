@@ -339,8 +339,14 @@ namespace BatteryAlert.UI
         {
             PositionNearTray();
             RefreshAll();
+            if (WindowState == FormWindowState.Minimized)
+            {
+                WindowState = FormWindowState.Normal;
+            }
             Show();
             Activate();
+            BringToFront();
+            NativeMethods.SetForegroundWindow(Handle);
         }
 
         public void HideFlyout()
