@@ -61,12 +61,14 @@ if ($msBuildPath) {
 } elseif ($cscPath) {
     Write-Host "      Using csc.exe: $cscPath" -ForegroundColor DarkGray
     $csFiles = Get-ChildItem -Path $srcDir -Filter "*.cs" -Recurse | Select-Object -ExpandProperty FullName
+    $manifestPath = Join-Path $srcDir "app.manifest"
     $cscArgs = @(
         "/target:winexe",
         "/optimize+",
         "/nologo",
         "/out:$outputExe",
         "/win32icon:$icoPath",
+        "/win32manifest:$manifestPath",
         "/r:System.dll",
         "/r:System.Core.dll",
         "/r:System.Drawing.dll",

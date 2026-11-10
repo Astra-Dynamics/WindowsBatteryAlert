@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Text;
 using System.Windows.Forms;
 
 namespace BatteryAlert.UI
@@ -10,7 +11,7 @@ namespace BatteryAlert.UI
         private readonly int _threshold;
         private readonly bool _isLocked;
         private bool _isDeleteHovered;
-        private Rectangle _deleteRect;
+        private RectangleF _deleteRect;
 
         public event Action<int> DeleteRequested;
 
@@ -28,8 +29,8 @@ namespace BatteryAlert.UI
                      ControlStyles.SupportsTransparentBackColor, true);
 
             BackColor = Color.Transparent;
-            Font = new Font("Segoe UI", 8.5f, FontStyle.Regular);
-            Size = new Size(62, 28);
+            Font = new Font("Segoe UI", 9f, FontStyle.Regular, GraphicsUnit.Point);
+            Size = new Size(68, 30);
             Cursor = Cursors.Default;
         }
 
@@ -75,78 +76,111 @@ namespace BatteryAlert.UI
         protected override void OnPaint(PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.SmoothingMode = SmoothingMode.HighQuality;
+            g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
             Rectangle rect = new Rectangle(0, 0, Width - 1, Height - 1);
-            using (GraphicsPath path = GetRoundedRectangle(rect, 6))
+            using (GraphicsPath path = GetRoundedRectangle(rect, 8))
             {
                 // Background
-                using (SolidBrush bgBrush = new SolidBrush(Color.FromArgb(24, 24, 28)))
+                using (SolidBrush bgBrush = new SolidBrush(Color.FromArgb(24, 25, 30)))
                 {
                     g.FillPath(bgBrush, path);
                 }
 
                 // Border
-                Color borderColor = _isLocked ? Color.FromArgb(42, 42, 48) : Color.FromArgb(55, 55, 65);
-                using (Pen borderPen = new Pen(borderColor, 1f))
+                Color borderColor = _isLocked ? Color.FromArgb(45, 46, 54) : Color.FromArgb(60, 62, 74);
+                using (Pen borderPen = new Pen(borderColor, 1.1f))
                 {
                     g.DrawPath(borderPen, path);
                 }
             }
 
-            // Text: "95%"
+            // Percentage Text
             string text = string.Format("{0}%", _threshold);
-            Rectangle textRect = new Rectangle(6, 0, Width - 24, Height);
-            TextRenderer.DrawText(g, text, Font, textRect, Color.FromArgb(235, 235, 235),
-                TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+            RectangleF textRect = new RectangleF(6f, 0f, Width - 26f, Height);
+            using (StringFormat sf = new StringFormat())
+            {
+                sf.Alignment = StringAlignment.Center;
+                sf.LineAlignment = StringAlignment.Center;
+                using (SolidBrush textBrush = new SolidBrush(Color.FromArgb(235, 238, 245)))
+                {
+                    g.DrawString(text, Font, textBrush, textRect, sf);
+                }
+            }
 
             // Icon area on the right
-            _deleteRect = new Rectangle(Width - 20, (Height - 16) / 2, 16, 16);
+            _deleteRect = new RectangleF(Width - 22f, (Height - 16f) / 2f, 16f, 16f);
 
             if (_isLocked)
             {
-                // Draw small lock icon
-                DrawLock(g, _deleteRect.X + 2, _deleteRect.Y + 2, 10, 11, Color.FromArgb(120, 120, 130));
+                // Crisp Vector Padlock
+                DrawVectorLock(g, _deleteRect.X + 3f, _deleteRect.Y + 2f, 10f, 11f, Color.FromArgb(130, 135, 145));
             }
             else
             {
-                // Draw small "✕" remove icon
-                Color crossColor = _isDeleteHovered ? Color.FromArgb(255, 85, 85) : Color.FromArgb(140, 140, 150);
-                using (Font crossFont = new Font("Segoe UI", 8f, FontStyle.Bold))
+                // Crisp Close "×"
+                Color crossColor = _isDeleteHovered ? Color.FromArgb(255, 90, 90) : Color.FromArgb(145, 150, 165);
+                using (Font crossFont = new Font("Segoe UI", 9f, FontStyle.Bold))
+                using (StringFormat sf = new StringFormat())
                 {
-                    TextRenderer.DrawText(g, "×", crossFont, _deleteRect, crossColor,
-                        TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                    sf.Alignment = StringAlignment.Center;
+                    sf.LineAlignment = StringAlignment.Center;
+                    using (SolidBrush brush = new SolidBrush(crossColor))
+                    {
+                        g.DrawString("×", crossFont, brush, _deleteRect, sf);
+                    }
                 }
             }
         }
 
-        private static void DrawLock(Graphics g, int x, int y, int w, int h, Color color)
+        private static void DrawVectorLock(Graphics g, float x, float y, float w, float h, Color color)
         {
-            // Padlock shackle
-            using (Pen pen = new Pen(color, 1.2f))
+            // Padlock arch shackle
+            using (Pen pen = new Pen(color, 1.4f))
             {
-                g.DrawArc(pen, x + 2, y, w - 4, 6, 180, 180);
+                pen.StartCap = LineCap.Round;
+                pen.EndCap = LineCap.Round;
+                g.DrawArc(pen, x + 1.5f, y, w - 3f, 6.5f, 180f, 180f);
             }
+
             // Padlock body
-            using (SolidBrush brush = new SolidBrush(color))
+            RectangleF bodyRect = new RectangleF(x, y + 4.5f, w, h - 4.5f);
+            using (GraphicsPath bodyPath = GetRoundedRectangleF(bodyRect, 2f))
             {
-                g.FillRectangle(brush, x + 1, y + 4, w - 2, h - 4);
+                using (SolidBrush brush = new SolidBrush(color))
+                {
+                    g.FillPath(brush, bodyPath);
+                }
+            }
+
+            // Small keyhole dot
+            using (SolidBrush keyBrush = new SolidBrush(Color.FromArgb(24, 25, 30)))
+            {
+                g.FillEllipse(keyBrush, x + (w / 2f) - 1f, y + 6.5f, 2f, 2f);
             }
         }
 
         private static GraphicsPath GetRoundedRectangle(Rectangle bounds, int radius)
         {
-            GraphicsPath path = new GraphicsPath();
-            int diameter = radius * 2;
-            Rectangle arc = new Rectangle(bounds.Location, new Size(diameter, diameter));
+            return GetRoundedRectangleF(new RectangleF(bounds.X, bounds.Y, bounds.Width, bounds.Height), radius);
+        }
 
-            path.AddArc(arc, 180, 90);
+        private static GraphicsPath GetRoundedRectangleF(RectangleF bounds, float radius)
+        {
+            GraphicsPath path = new GraphicsPath();
+            float diameter = radius * 2f;
+            RectangleF arc = new RectangleF(bounds.Location, new SizeF(diameter, diameter));
+
+            path.AddArc(arc, 180f, 90f);
             arc.X = bounds.Right - diameter;
-            path.AddArc(arc, 270, 90);
+            path.AddArc(arc, 270f, 90f);
             arc.Y = bounds.Bottom - diameter;
-            path.AddArc(arc, 0, 90);
+            path.AddArc(arc, 0f, 90f);
             arc.X = bounds.Left;
-            path.AddArc(arc, 90, 90);
+            path.AddArc(arc, 90f, 90f);
             path.CloseFigure();
             return path;
         }

@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Text;
 using System.Windows.Forms;
 
 namespace BatteryAlert.UI
@@ -10,17 +11,24 @@ namespace BatteryAlert.UI
         private bool _isHovered;
         private bool _isPressed;
         private bool _isActive;
+        private bool _isOutlineStyle = false;
         private Color _accentColor = Color.FromArgb(0, 216, 246);
-        private Color _idleBackColor = Color.FromArgb(28, 28, 30);
-        private Color _idleBorderColor = Color.FromArgb(50, 50, 54);
-        private Color _activeTextColor = Color.FromArgb(16, 16, 18);
-        private Color _idleTextColor = Color.FromArgb(220, 220, 220);
+        private Color _idleBackColor = Color.FromArgb(25, 25, 30);
+        private Color _idleBorderColor = Color.FromArgb(50, 50, 58);
+        private Color _activeTextColor = Color.FromArgb(0, 225, 255);
+        private Color _idleTextColor = Color.FromArgb(210, 210, 220);
         private int _borderRadius = 14;
 
         public bool IsActive
         {
             get { return _isActive; }
             set { _isActive = value; Invalidate(); }
+        }
+
+        public bool IsOutlineStyle
+        {
+            get { return _isOutlineStyle; }
+            set { _isOutlineStyle = value; Invalidate(); }
         }
 
         public Color AccentColor
@@ -49,7 +57,7 @@ namespace BatteryAlert.UI
                      ControlStyles.ResizeRedraw |
                      ControlStyles.SupportsTransparentBackColor, true);
             BackColor = Color.Transparent;
-            Font = new Font("Segoe UI", 9f, FontStyle.Regular);
+            Font = new Font("Segoe UI", 8.5f, FontStyle.Regular);
             Cursor = Cursors.Hand;
             Size = new Size(80, 28);
         }
@@ -89,8 +97,10 @@ namespace BatteryAlert.UI
         protected override void OnPaint(PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.SmoothingMode = SmoothingMode.HighQuality;
             g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
             Rectangle rect = new Rectangle(0, 0, Width - 1, Height - 1);
             int radius = Math.Min(_borderRadius, rect.Height / 2);
@@ -100,18 +110,40 @@ namespace BatteryAlert.UI
                 Color bg;
                 Color border;
                 Color text;
+                float borderWidth = 1.2f;
 
-                if (_isActive)
+                if (_isOutlineStyle)
                 {
-                    bg = _isPressed ? Color.FromArgb(0, 180, 205) : (_isHovered ? Color.FromArgb(40, 230, 255) : _accentColor);
-                    border = bg;
-                    text = _activeTextColor;
+                    // Modern Cortana / Fluent toggle style
+                    if (_isActive)
+                    {
+                        bg = _isPressed ? Color.FromArgb(28, 42, 50) : (_isHovered ? Color.FromArgb(20, 36, 44) : Color.FromArgb(16, 26, 32));
+                        border = _isHovered ? Color.FromArgb(40, 235, 255) : _accentColor;
+                        borderWidth = 1.5f;
+                        text = Color.FromArgb(0, 225, 255);
+                    }
+                    else
+                    {
+                        bg = _isPressed ? Color.FromArgb(32, 32, 36) : (_isHovered ? Color.FromArgb(26, 26, 30) : _idleBackColor);
+                        border = _isHovered ? Color.FromArgb(80, 80, 92) : _idleBorderColor;
+                        text = Color.FromArgb(150, 150, 160);
+                    }
                 }
                 else
                 {
-                    bg = _isPressed ? Color.FromArgb(42, 42, 46) : (_isHovered ? Color.FromArgb(36, 36, 40) : _idleBackColor);
-                    border = _isHovered ? _accentColor : _idleBorderColor;
-                    text = _isHovered ? Color.White : _idleTextColor;
+                    // Standard action pill button
+                    if (_isActive)
+                    {
+                        bg = _isPressed ? Color.FromArgb(0, 175, 200) : (_isHovered ? Color.FromArgb(30, 225, 255) : _accentColor);
+                        border = bg;
+                        text = Color.FromArgb(14, 14, 16);
+                    }
+                    else
+                    {
+                        bg = _isPressed ? Color.FromArgb(38, 38, 44) : (_isHovered ? Color.FromArgb(32, 32, 38) : _idleBackColor);
+                        border = _isHovered ? Color.FromArgb(0, 216, 246) : _idleBorderColor;
+                        text = _isHovered ? Color.White : _idleTextColor;
+                    }
                 }
 
                 using (SolidBrush brush = new SolidBrush(bg))
@@ -119,13 +151,21 @@ namespace BatteryAlert.UI
                     g.FillPath(brush, path);
                 }
 
-                using (Pen pen = new Pen(border, 1.2f))
+                using (Pen pen = new Pen(border, borderWidth))
                 {
                     g.DrawPath(pen, path);
                 }
 
-                TextRenderer.DrawText(g, Text, Font, rect, text,
-                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine);
+                // High-precision subpixel text alignment
+                using (StringFormat sf = new StringFormat())
+                {
+                    sf.Alignment = StringAlignment.Center;
+                    sf.LineAlignment = StringAlignment.Center;
+                    using (SolidBrush textBrush = new SolidBrush(text))
+                    {
+                        g.DrawString(Text, Font, textBrush, new RectangleF(0, 0, Width, Height), sf);
+                    }
+                }
             }
         }
 
@@ -135,21 +175,13 @@ namespace BatteryAlert.UI
             int diameter = radius * 2;
             Rectangle arc = new Rectangle(bounds.Location, new Size(diameter, diameter));
 
-            // Top left
             path.AddArc(arc, 180, 90);
-
-            // Top right
             arc.X = bounds.Right - diameter;
             path.AddArc(arc, 270, 90);
-
-            // Bottom right
             arc.Y = bounds.Bottom - diameter;
             path.AddArc(arc, 0, 90);
-
-            // Bottom left
             arc.X = bounds.Left;
             path.AddArc(arc, 90, 90);
-
             path.CloseFigure();
             return path;
         }

@@ -15,6 +15,7 @@ namespace BatteryAlert
         [STAThread]
         static void Main(string[] args)
         {
+            NativeMethods.EnableDpiAwareness();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 

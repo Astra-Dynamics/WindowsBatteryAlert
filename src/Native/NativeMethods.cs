@@ -33,6 +33,30 @@ namespace BatteryAlert.Native
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool DestroyIcon(IntPtr hIcon);
 
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool SetProcessDpiAwarenessContext(IntPtr dpiFlag);
+
+        [DllImport("shcore.dll")]
+        public static extern int SetProcessDpiAwareness(int awareness);
+
+        public static readonly IntPtr DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 = new IntPtr(-4);
+
+        public static void EnableDpiAwareness()
+        {
+            try
+            {
+                if (Environment.OSVersion.Version.Major >= 10)
+                {
+                    SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+                }
+                else
+                {
+                    SetProcessDpiAwareness(2);
+                }
+            }
+            catch { }
+        }
+
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool SetForegroundWindow(IntPtr hWnd);

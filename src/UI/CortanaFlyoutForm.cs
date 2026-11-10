@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Text;
 using System.Windows.Forms;
 using BatteryAlert.Models;
 using BatteryAlert.Native;
@@ -33,6 +34,8 @@ namespace BatteryAlert.UI
 
         private Label _lblThresholdsHeader;
         private FlowLayoutPanel _pnlThresholds;
+
+        private Panel _pnlAddInput;
         private TextBox _txtAddThreshold;
         private PillButton _btnAddThreshold;
         private Label _lblInputError;
@@ -60,8 +63,8 @@ namespace BatteryAlert.UI
 
             FormBorderStyle = FormBorderStyle.None;
             StartPosition = FormStartPosition.Manual;
-            Size = new Size(330, 485);
-            BackColor = Color.FromArgb(17, 17, 19);
+            Size = new Size(340, 500);
+            BackColor = Color.FromArgb(17, 17, 20);
             ShowInTaskbar = false;
             TopMost = true;
             KeyPreview = true;
@@ -69,19 +72,19 @@ namespace BatteryAlert.UI
             // Top Header
             _lblAppTitle = new Label
             {
-                Text = "BatteryAlert",
-                Font = new Font("Segoe UI Semibold", 9.5f),
-                ForeColor = Color.FromArgb(235, 235, 235),
+                Text = "⚡ BatteryAlert",
+                Font = new Font("Segoe UI Semibold", 9.5f, FontStyle.Regular, GraphicsUnit.Point),
+                ForeColor = Color.FromArgb(240, 240, 245),
                 Location = new Point(16, 12),
                 AutoSize = true
             };
 
             _lblSimBadge = new Label
             {
-                Text = "[SIMULATION - Click to Restart 85%]",
-                Font = new Font("Segoe UI", 7.5f, FontStyle.Bold),
-                ForeColor = Color.FromArgb(255, 185, 0),
-                Location = new Point(96, 14),
+                Text = "[SIMULATION - Restart 85%]",
+                Font = new Font("Segoe UI", 7.5f, FontStyle.Bold, GraphicsUnit.Point),
+                ForeColor = Color.FromArgb(255, 190, 20),
+                Location = new Point(125, 14),
                 AutoSize = true,
                 Cursor = Cursors.Hand,
                 Visible = _batteryMonitor.IsSimulating
@@ -97,31 +100,32 @@ namespace BatteryAlert.UI
             _btnClose = new Label
             {
                 Text = "✕",
-                Font = new Font("Segoe UI", 9f),
-                ForeColor = Color.FromArgb(140, 140, 145),
-                Location = new Point(300, 11),
-                Size = new Size(20, 20),
+                Font = new Font("Segoe UI", 9.5f, FontStyle.Regular, GraphicsUnit.Point),
+                ForeColor = Color.FromArgb(145, 145, 155),
+                Location = new Point(306, 10),
+                Size = new Size(22, 22),
                 TextAlign = ContentAlignment.MiddleCenter,
                 Cursor = Cursors.Hand
             };
             _btnClose.MouseEnter += (s, e) => _btnClose.ForeColor = Color.White;
-            _btnClose.MouseLeave += (s, e) => _btnClose.ForeColor = Color.FromArgb(140, 140, 145);
+            _btnClose.MouseLeave += (s, e) => _btnClose.ForeColor = Color.FromArgb(145, 145, 155);
             _btnClose.Click += (s, e) => HideFlyout();
 
             // Centerpiece: Cortana Circle Arc
             _circleControl = new CortanaCircleControl
             {
-                Location = new Point(85, 38),
-                Size = new Size(160, 160)
+                Location = new Point(85, 36),
+                Size = new Size(170, 170)
             };
 
-            // Master Toggle Button
+            // Master Toggle Button (Cortana Outline Style)
             _btnMasterToggle = new PillButton
             {
                 Text = "NOTIFICATIONS: ON",
-                Font = new Font("Segoe UI Semibold", 8.5f),
-                Location = new Point(55, 200),
-                Size = new Size(220, 30),
+                Font = new Font("Segoe UI Semibold", 9f, FontStyle.Regular, GraphicsUnit.Point),
+                Location = new Point(50, 212),
+                Size = new Size(240, 32),
+                IsOutlineStyle = true,
                 IsActive = true
             };
             _btnMasterToggle.Click += OnMasterToggleClicked;
@@ -130,20 +134,20 @@ namespace BatteryAlert.UI
             _lblStatus = new Label
             {
                 Text = "● Active - Monitoring charge level",
-                Font = new Font("Segoe UI", 8f),
-                ForeColor = Color.FromArgb(140, 140, 145),
-                Location = new Point(16, 234),
-                Size = new Size(210, 18),
+                Font = new Font("Segoe UI", 8.2f, FontStyle.Regular, GraphicsUnit.Point),
+                ForeColor = Color.FromArgb(145, 145, 155),
+                Location = new Point(16, 250),
+                Size = new Size(215, 18),
                 TextAlign = ContentAlignment.MiddleLeft
             };
 
             _btnResumeNow = new Label
             {
                 Text = "Resume now",
-                Font = new Font("Segoe UI", 8f, FontStyle.Underline),
+                Font = new Font("Segoe UI", 8.2f, FontStyle.Underline, GraphicsUnit.Point),
                 ForeColor = Color.FromArgb(0, 216, 246),
-                Location = new Point(230, 234),
-                Size = new Size(84, 18),
+                Location = new Point(234, 250),
+                Size = new Size(90, 18),
                 TextAlign = ContentAlignment.MiddleRight,
                 Cursor = Cursors.Hand,
                 Visible = false
@@ -154,36 +158,36 @@ namespace BatteryAlert.UI
             _lblPauseHeader = new Label
             {
                 Text = "PAUSE UNTIL",
-                Font = new Font("Segoe UI Semibold", 7.5f),
-                ForeColor = Color.FromArgb(110, 110, 120),
-                Location = new Point(16, 258),
+                Font = new Font("Segoe UI Semibold", 7.5f, FontStyle.Regular, GraphicsUnit.Point),
+                ForeColor = Color.FromArgb(115, 115, 130),
+                Location = new Point(16, 274),
                 AutoSize = true
             };
 
             _btnPause1h = new PillButton
             {
                 Text = "1 h",
-                Font = new Font("Segoe UI", 8f),
-                Location = new Point(16, 276),
-                Size = new Size(54, 26)
+                Font = new Font("Segoe UI", 8.2f, FontStyle.Regular, GraphicsUnit.Point),
+                Location = new Point(16, 292),
+                Size = new Size(62, 28)
             };
             _btnPause1h.Click += (s, e) => _configService.SetPauseUntil(DateTime.Now.AddHours(1));
 
             _btnPause2h = new PillButton
             {
                 Text = "2 h",
-                Font = new Font("Segoe UI", 8f),
-                Location = new Point(76, 276),
-                Size = new Size(54, 26)
+                Font = new Font("Segoe UI", 8.2f, FontStyle.Regular, GraphicsUnit.Point),
+                Location = new Point(84, 292),
+                Size = new Size(62, 28)
             };
             _btnPause2h.Click += (s, e) => _configService.SetPauseUntil(DateTime.Now.AddHours(2));
 
             _btnPauseTomorrow = new PillButton
             {
                 Text = "Tom 8 AM",
-                Font = new Font("Segoe UI", 8f),
-                Location = new Point(136, 276),
-                Size = new Size(86, 26)
+                Font = new Font("Segoe UI", 8.2f, FontStyle.Regular, GraphicsUnit.Point),
+                Location = new Point(152, 292),
+                Size = new Size(92, 28)
             };
             _btnPauseTomorrow.Click += (s, e) =>
             {
@@ -195,9 +199,9 @@ namespace BatteryAlert.UI
             _btnPauseCustom = new PillButton
             {
                 Text = "Custom...",
-                Font = new Font("Segoe UI", 8f),
-                Location = new Point(228, 276),
-                Size = new Size(86, 26)
+                Font = new Font("Segoe UI", 8.2f, FontStyle.Regular, GraphicsUnit.Point),
+                Location = new Point(250, 292),
+                Size = new Size(74, 28)
             };
             _btnPauseCustom.Click += OnPauseCustomClicked;
 
@@ -205,30 +209,47 @@ namespace BatteryAlert.UI
             _lblThresholdsHeader = new Label
             {
                 Text = "ALERT THRESHOLDS",
-                Font = new Font("Segoe UI Semibold", 7.5f),
-                ForeColor = Color.FromArgb(110, 110, 120),
-                Location = new Point(16, 314),
+                Font = new Font("Segoe UI Semibold", 7.5f, FontStyle.Regular, GraphicsUnit.Point),
+                ForeColor = Color.FromArgb(115, 115, 130),
+                Location = new Point(16, 330),
                 AutoSize = true
             };
 
             _pnlThresholds = new FlowLayoutPanel
             {
-                Location = new Point(16, 332),
-                Size = new Size(298, 74),
+                Location = new Point(14, 348),
+                Size = new Size(312, 70),
                 AutoScroll = true,
-                BackColor = Color.FromArgb(20, 20, 24),
-                Padding = new Padding(4)
+                BackColor = Color.Transparent,
+                Padding = new Padding(0)
             };
 
-            // Add custom threshold controls
+            // Unified composite Add Threshold bar
+            _pnlAddInput = new Panel
+            {
+                Location = new Point(16, 424),
+                Size = new Size(308, 34),
+                BackColor = Color.FromArgb(24, 25, 30)
+            };
+            _pnlAddInput.Paint += (s, e) =>
+            {
+                e.Graphics.SmoothingMode = SmoothingMode.HighQuality;
+                Rectangle rect = new Rectangle(0, 0, _pnlAddInput.Width - 1, _pnlAddInput.Height - 1);
+                using (GraphicsPath path = GetRoundedRectangle(rect, 8))
+                using (Pen borderPen = new Pen(Color.FromArgb(48, 50, 60), 1.1f))
+                {
+                    e.Graphics.DrawPath(borderPen, path);
+                }
+            };
+
             _txtAddThreshold = new TextBox
             {
-                Location = new Point(16, 416),
-                Size = new Size(110, 24),
-                BackColor = Color.FromArgb(28, 28, 34),
-                ForeColor = Color.FromArgb(240, 240, 240),
-                BorderStyle = BorderStyle.FixedSingle,
-                Font = new Font("Segoe UI", 9f)
+                Location = new Point(12, 8),
+                Size = new Size(225, 20),
+                BackColor = Color.FromArgb(24, 25, 30),
+                ForeColor = Color.FromArgb(240, 240, 245),
+                BorderStyle = BorderStyle.None,
+                Font = new Font("Segoe UI", 9f, FontStyle.Regular, GraphicsUnit.Point)
             };
             _txtAddThreshold.KeyDown += (s, e) =>
             {
@@ -242,23 +263,26 @@ namespace BatteryAlert.UI
             _btnAddThreshold = new PillButton
             {
                 Text = "+ Add",
-                Font = new Font("Segoe UI Semibold", 8.5f),
-                Location = new Point(134, 415),
-                Size = new Size(68, 26),
+                Font = new Font("Segoe UI Semibold", 8.2f, FontStyle.Regular, GraphicsUnit.Point),
+                Location = new Point(245, 4),
+                Size = new Size(58, 26),
                 IsActive = true
             };
             _btnAddThreshold.Click += (s, e) => TryAddThreshold();
 
+            _pnlAddInput.Controls.Add(_txtAddThreshold);
+            _pnlAddInput.Controls.Add(_btnAddThreshold);
+
             _lblInputError = new Label
             {
                 Text = "",
-                Font = new Font("Segoe UI", 7.5f),
+                Font = new Font("Segoe UI", 7.5f, FontStyle.Regular, GraphicsUnit.Point),
                 ForeColor = Color.FromArgb(255, 110, 110),
-                Location = new Point(16, 446),
-                Size = new Size(298, 18)
+                Location = new Point(16, 464),
+                Size = new Size(308, 18)
             };
 
-            // Add controls
+            // Add controls to form
             Controls.Add(_lblAppTitle);
             Controls.Add(_lblSimBadge);
             Controls.Add(_btnClose);
@@ -273,8 +297,7 @@ namespace BatteryAlert.UI
             Controls.Add(_btnPauseCustom);
             Controls.Add(_lblThresholdsHeader);
             Controls.Add(_pnlThresholds);
-            Controls.Add(_txtAddThreshold);
-            Controls.Add(_btnAddThreshold);
+            Controls.Add(_pnlAddInput);
             Controls.Add(_lblInputError);
 
             ResumeLayout(false);
@@ -283,7 +306,6 @@ namespace BatteryAlert.UI
 
         private void ApplyStyling()
         {
-            // Apply Windows 10/11 dark mode & rounded corners
             try
             {
                 int darkMode = 1;
@@ -306,7 +328,6 @@ namespace BatteryAlert.UI
         protected override void OnDeactivate(EventArgs e)
         {
             base.OnDeactivate(e);
-            // Hide flyout when user clicks away
             HideFlyout();
         }
 
@@ -354,7 +375,6 @@ namespace BatteryAlert.UI
             if (Visible)
             {
                 Hide();
-                // Free working set when hidden to minimize RAM
                 NativeMethods.TrimWorkingSet();
             }
         }
@@ -480,7 +500,7 @@ namespace BatteryAlert.UI
             if (!config.NotificationsEnabled)
             {
                 _lblStatus.Text = "✕ Silenced indefinitely";
-                _lblStatus.ForeColor = Color.FromArgb(120, 120, 125);
+                _lblStatus.ForeColor = Color.FromArgb(125, 125, 135);
                 _btnResumeNow.Visible = false;
             }
             else if (config.IsPaused)
@@ -491,7 +511,7 @@ namespace BatteryAlert.UI
                     : localPause.ToString("ddd h:mm tt");
 
                 _lblStatus.Text = "⏸ Paused until " + timeStr;
-                _lblStatus.ForeColor = Color.FromArgb(255, 185, 0);
+                _lblStatus.ForeColor = Color.FromArgb(255, 190, 20);
                 _btnResumeNow.Visible = true;
             }
             else
@@ -510,6 +530,7 @@ namespace BatteryAlert.UI
             {
                 bool isLocked = AppConfig.IsDefault(t);
                 ThresholdChipControl chip = new ThresholdChipControl(t, isLocked);
+                chip.Margin = new Padding(2, 2, 4, 4);
                 if (!isLocked)
                 {
                     chip.DeleteRequested += (val) => _configService.RemoveCustomThreshold(val);
@@ -523,28 +544,28 @@ namespace BatteryAlert.UI
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
-            // Draw subtle outer border
-            using (Pen borderPen = new Pen(Color.FromArgb(40, 40, 48), 1.2f))
+            e.Graphics.SmoothingMode = SmoothingMode.HighQuality;
+            using (Pen borderPen = new Pen(Color.FromArgb(42, 44, 52), 1.2f))
             {
                 e.Graphics.DrawRectangle(borderPen, 0, 0, Width - 1, Height - 1);
             }
         }
 
-        protected override void WndProc(ref Message m)
+        private static GraphicsPath GetRoundedRectangle(Rectangle bounds, int radius)
         {
-            if (m.Msg == (int)_showWindowMessage && _showWindowMessage != 0)
-            {
-                // Second instance requested window open
-                ShowFlyout();
-                return;
-            }
+            GraphicsPath path = new GraphicsPath();
+            int diameter = radius * 2;
+            Rectangle arc = new Rectangle(bounds.Location, new Size(diameter, diameter));
 
-            if (m.Msg == NativeMethods.WM_POWERBROADCAST)
-            {
-                _batteryMonitor.CheckStatus();
-            }
-
-            base.WndProc(ref m);
+            path.AddArc(arc, 180, 90);
+            arc.X = bounds.Right - diameter;
+            path.AddArc(arc, 270, 90);
+            arc.Y = bounds.Bottom - diameter;
+            path.AddArc(arc, 0, 90);
+            arc.X = bounds.Left;
+            path.AddArc(arc, 90, 90);
+            path.CloseFigure();
+            return path;
         }
     }
 }
